@@ -1,7 +1,19 @@
-import { CommentForm } from "@/components/CommentForm";
-import { CommentList } from "@/components/CommentList";
-import { Vote } from "@/components/Vote";
-import { db } from "@/db";
+import { CommentForm } from '@/components/CommentForm';
+import { CommentList } from '@/components/CommentList';
+import { Vote } from '@/components/Vote';
+import { db } from '@/db';
+
+export async function generateMetadata({ params, searchParams }, parent) {
+  const { rows: posts } = await db.query(
+    `SELECT * FROM posts WHERE posts.id = $1`,
+    [params.postId]
+  );
+  const post = posts[0];
+
+  return {
+    title: `Diddit - ${post.title}`,
+  };
+}
 
 export default async function SinglePostPage({ params }) {
   const postId = params.postId;

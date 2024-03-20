@@ -1,11 +1,11 @@
-import { db } from "@/db";
-import auth from "../app/middleware";
-import { revalidatePath } from "next/cache";
-import { VoteButtons } from "./VoteButtons";
+import { db } from '@/db';
+import auth from '../app/middleware';
+import { revalidatePath } from 'next/cache';
+import { VoteButtons } from './VoteButtons';
 
 async function getExistingVote(userId, postId) {
   const { rows: existingVotes } = await db.query(
-    "SELECT * FROM votes WHERE user_id = $1 AND post_id = $2 LIMIT 1",
+    'SELECT * FROM votes WHERE user_id = $1 AND post_id = $2 LIMIT 1',
     [userId, postId]
   );
 
@@ -14,15 +14,19 @@ async function getExistingVote(userId, postId) {
 
 async function handleVote(userId, postId, newVote) {
   // Check if the user has already voted on this post
+  if (!userId) {
+    throw new Error('Cannot vote without being logged in');
+  }
+
   const existingVote = await getExistingVote(userId, postId);
 
   if (existingVote) {
     if (existingVote.vote === newVote) {
       // User is toggling their vote, so remove it
-      await db.query("DELETE FROM votes WHERE id = $1", [existingVote.id]);
+      await db.query('DELETE FROM votes WHERE id = $1', [existingVote.id]);
     } else {
       // Update the existing vote
-      await db.query("UPDATE votes SET vote = $1 WHERE id = $2", [
+      await db.query('UPDATE votes SET vote = $1 WHERE id = $2', [
         newVote,
         existingVote.id,
       ]);
@@ -41,16 +45,16 @@ async function handleVote(userId, postId, newVote) {
 
 export async function Vote({ postId, votes }) {
   const session = await auth();
-  const existingVote = await getExistingVote(session.user.id, postId);
+  const existingVote = await getExistingVote(session?.user?.id, postId);
 
   async function upvote() {
-    "use server";
-    await handleVote(session.user.id, postId, 1);
+    'use server';
+    await handleVote(session?.user?.id, postId, 1);
   }
 
   async function downvote() {
-    "use server";
-    await handleVote(session.user.id, postId, -1);
+    'use server';
+    await handleVote(session?.user?.id, postId, -1);
   }
 
   return (
