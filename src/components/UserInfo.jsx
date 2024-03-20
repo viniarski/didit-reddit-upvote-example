@@ -1,15 +1,15 @@
-import auth from "../app/middleware";
-import { LoginButton } from "./LoginButton";
-import { LogoutButton } from "./LogoutButton";
+import auth from '../app/middleware';
+import { LoginButton } from './LoginButton';
+import { LogoutButton } from './LogoutButton';
 
 export async function UserInfo() {
   const session = await auth();
 
   return (
     <div>
-      {session ? (
+      {session && session.user ? (
         <div>
-          {session.user.name}{" "}
+          {session.user.name}{' '}
           <span className="text-xs text-zinc-400 mr-3">#{session.user.id}</span>
           <LogoutButton />
         </div>
